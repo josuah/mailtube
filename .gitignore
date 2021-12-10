@@ -1,0 +1,4 @@
+*.tgz
+*.o
+mailtube-server
+mailtube-xnotify
