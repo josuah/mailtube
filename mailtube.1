@@ -1,0 +1,115 @@
+.Dd dec 10, 2021
+.Dt MAILTUBE 1
+.Os
+.
+.
+.Sh NAME
+.
+.Nm mailtube-server
+.Nm mailtube-xnotify
+.Nd scan a Maildir an send notifications to xnotify
+.
+.
+.Sh SYNOPSIS
+.
+.Nm mailtube-xnotify
+.Op Fl v
+.Ar server-command...
+.
+.Nm mailtube-server
+.Op Fl v
+.Op Fl s Ar freq
+.Ar dir
+.
+.
+.Sh DESCRIPTION
+.
+.Pp
+.Nm mailtube-server
+discovers Maildirs subdirectories of
+.Ar dir
+and scans for mails in the
+.Pa new
+directory.
+For every new mail encountered, a notification message is sent to
+stdout with the name of the file, and one line per header (not all
+headers are shown).
+Then, the mail is moved to the
+.Pa cur
+directory.
+.
+.Bl -tag
+.
+.It Fl v
+Get the version.
+.
+.It Fl s
+Sets the scan frequency at which the Maildir tree is scanned for
+new directories and new messages.
+.
+.El
+.
+.
+.Pp
+.Nm mailtube-xnotify
+executes a command, usually
+.Nm mailtube-server ,
+and pipes each line this program prints to the file at path
+.Ev $XNOTIFY_FIFO .
+The input format is the one printed by
+.Nm mailtube-server.
+The output format is the one understood by
+.Xr xnotify 1 .
+.
+.Bl -tag
+.
+.It Fl v
+Get the version.
+.
+.El
+.
+.
+.Sh ENVIRONMENT
+.
+.Bl -tag 6n
+.
+.It Ev XNOTIFY_FIFO
+Contains a path to 
+.Xr xnotify 1
+FIFO, to which
+.Nm mailtube-xnotify
+will send the notifications messages.
+.
+.El
+.
+.
+.Sh EXAMPLES
+.
+.Pp
+Send a notification for every mail received in a local Maildir directory:
+.Bd -literal
+$ mailtube-xnotify mailtube-server Maildir
+.Ed
+.
+.Pp
+The same, but with a remote maildir, over SSH:
+.Bd -literal
+$ mailtube-xnotify ssh user@example.org mailtube-server Maildir
+.Ed
+.
+.
+.Sh CAVEATS
+.
+If an IMAP daemon is run on the same server, it may race to get the new mails.
+This can be worked around, by not scanning the same directories as
+.Nm .
+.
+.
+.Sh SEE ALSO
+.
+.Xr xnotify 1
+.
+.
+.Sh AUTHORS
+.
+Josuah Demangeon <me@josuah.net>
