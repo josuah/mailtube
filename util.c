@@ -62,11 +62,12 @@ warnx(char const *fmt, ...)
 size_t
 strlcpy(char *d, char const *s, size_t sz)
 {
-	size_t len, cpy;
+	size_t len;
 
 	len = strlen(s);
-	cpy = (len > sz) ? (sz) : (len);
-	memcpy(d, s, cpy + 1);
+	if (sz == 0)
+		return len;
+	memcpy(d, s, (len + 1 > sz) ? sz : len + 1);
 	d[sz - 1] = '\0';
 	return len;
 }
