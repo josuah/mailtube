@@ -5,21 +5,22 @@
 .
 .Sh NAME
 .
-.Nm mailtube-server
-.Nm mailtube-xnotify
+.Nm mailtube-server ,
+.Nm mailtube-xnotify ,
+.Nm mailtube-herbe
 .Nd scan a Maildir an send notifications to xnotify
 .
 .
 .Sh SYNOPSIS
 .
-.Nm mailtube-xnotify
-.Op Fl v
-.Ar server-command...
-.
 .Nm mailtube-server
 .Op Fl v
 .Op Fl s Ar freq
 .Ar dir
+.
+.Nm mailtube-client
+.Op Fl v
+.Ar server-command...
 .
 .
 .Sh DESCRIPTION
@@ -51,20 +52,48 @@ new directories and new messages.
 .
 .
 .Pp
-.Nm mailtube-xnotify
+.Nm mailtube-client
 executes a command, usually
 .Nm mailtube-server ,
-and pipes each line this program prints to the file at path
-.Ev $XNOTIFY_FIFO .
-The input format is the one printed by
-.Nm mailtube-server.
-The output format is the one understood by
-.Xr xnotify 1 .
+and send a notification for each message from mailtube-server to the desktop.
+.
+.Pp
+Instead of invoking mailtube-client directly, the actual client are named
+.Nm mailtube-xnotify
+and
+.Nm mailtube-herbe
 .
 .Bl -tag
 .
 .It Fl v
 Get the version.
+.
+.El
+.
+.Sh CLIENT FRONTENDS
+.
+.Pp
+Various clients can be used interchangably.
+To build a new client frontend add an entry to
+.Va CLIENTS
+in the
+.Pa Makefile ,
+then add a mailtube-clientname.c file with at least:
+.
+.Bl -tag
+.
+.It Ft void Fn init_notifications "void"
+Called first befor any notification is sent.
+.
+.It Ft void Fn send_notification_path "char *mail"
+Called at the start of a new notification, with the path to the
+mail on the Maildir, to use as an action for the notification.
+.
+.It Ft void Fn send_notification_header "char *header"
+Called for each header of mail, to show on the notification.
+.
+.It Ft void Fn send_notification_end "void"
+Called last, for actually sending the notification.
 .
 .El
 .
@@ -79,6 +108,12 @@ Contains a path to
 FIFO, to which
 .Nm mailtube-xnotify
 will send the notifications messages.
+.
+.It Ev DISPLAY
+Used by most X11 programs to select the display, including
+.Xr herbe 1
+and
+.Xr xnotify 1 .
 .
 .El
 .

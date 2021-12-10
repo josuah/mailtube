@@ -5,10 +5,11 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <unistd.h>
 #include "util.h"
 #include "mailtube.h"
 
-FILE *xnotify;
+char notification[1024];
 
 /*
  * format the feed of notifications to the file $XNOTIFY_FIFO
@@ -17,33 +18,32 @@ FILE *xnotify;
 void
 send_notification_path(char *mail)
 {
-	fprintf(xnotify, "CMD:mail %s", mail);
+	(void)mail;
 }
 
 void
 send_notification_header(char *header)
 {
-	fprintf(xnotify, "\t%s", header);
+	if (notification[0] != '\0')
+		strlcat(notification, "\n", sizeof notification);
+	strlcat(notification, header, sizeof notification);
 }
 
 void
 send_notification_end(void)
 {
-	fputc('\n', xnotify);
-	fflush(xnotify);
-
-	if (ferror(xnotify))
-		err(1, "error writing to xnotify");
+	switch (fork()) {
+	case 0:
+		execlp("herbe", "herbe", notification, NULL);
+		err(1, "could not execute herbe");
+	case -1:
+		err(1, "could not fork");
+	}
+	notification[0] = '\0';
 }
 
 void
 init_notifications(void)
 {
-	char *fifo;
-
-	if ((fifo = getenv("XNOTIFY_FIFO")) == NULL)
-		err(1, "missing environment variable: $XNOTIFY_FIFO");
-
-	if ((xnotify = fopen(fifo, "w")) == NULL)
-		err(1, "cannot open $XNOTIFY_FIFO (%s) for writing", fifo);
+	notification[0] = '\0';
 }

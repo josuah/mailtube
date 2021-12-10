@@ -3,30 +3,35 @@ VERSION = 0.1
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/man
 
-D = -D_POSIX_C_SOURCE=200811L -D_BSD_SOURCE -DVERSION='"${VERSION}"'
-CFLAGS = $D -g #-Wall -Wextra -std=c99 -pedantic
+CPPFLAGS = -D_POSIX_C_SOURCE=200811L -D_BSD_SOURCE -DVERSION='"${VERSION}"'
+CFLAGS = -g -Wall -Wextra -std=c99 -pedantic
 LDFLAGS = -static
 
+HDR = util.h mailtube.h
 OBJ = util.o
-BIN = mailtube-xnotify mailtube-server
+BIN = mailtube-server
+CLIENTS = mailtube-xnotify mailtube-herbe
 MAN1 = mailtube.1
 
-all: ${BIN}
+all: ${BIN} ${CLIENTS}
 
 .c.o:
-	${CC} -c ${CFLAGS} -o $@ $<
+	${CC} ${CFLAGS} ${CPPFLAGS} -c -o $@ $<
 
-${OBJ} ${BIN:=.o}: Makefile ${HDR}
+${OBJ:.o=.c} ${BIN:=.c} ${CLIENTS:=.c}: Makefile ${HDR}
 
-${BIN}: ${OBJ} ${BIN:=.o}
-	${CC} ${LDFLAGS} -o $@ $@.o ${OBJ} ${LIB}
+${BIN}: $@.o ${OBJ}
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJ} $@.o ${LIB}
+
+${CLIENTS}: $@.o ${OBJ} client.o
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJ} client.o $@.o ${LIB}
 
 clean:
 	rm -rf *.o ${BIN} *.tgz
 
-install: ${BIN}
+install: ${BIN} ${CLIENTS}
 	mkdir -p ${DESTDIR}$(PREFIX)/bin
-	cp -f $(BIN) ${DESTDIR}$(PREFIX)/bin
+	cp -f $(BIN) ${CLIENTS} ${DESTDIR}$(PREFIX)/bin
 	mkdir -p ${DESTDIR}$(MANPREFIX)/man1
 	cp -f ${MAN1} ${DESTDIR}$(MANPREFIX)/man1
 
