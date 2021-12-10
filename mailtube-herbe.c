@@ -12,7 +12,7 @@
 char notification[1024];
 
 /*
- * format the feed of notifications to the file $XNOTIFY_FIFO
+ * spawn `herbe` for each incoming notification
  */
 
 void
