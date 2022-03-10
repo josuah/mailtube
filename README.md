@@ -1,5 +1,7 @@
 mailtube
 ========
+`git://git.josuah.net/mailtube` - [0.2](/mailtube/mailtube-0.2.tgz)
+
 While YouTube gives you an uninterrupted flow of distraction,
 mailltube gives you a continuous stream of focus.
 
